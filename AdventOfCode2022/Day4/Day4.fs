@@ -37,8 +37,7 @@ module Puzzle7 =
 module Puzzle8 =
     let overlap (pair: Pair) =
         match pair with
-        | (l1, _), (_, r2) when l1 > r2 -> false
-        | (_, r1), (l2, _) when r1 < l2 -> false
+        | (l1, r1), (l2, r2) when l1 > r2 || r1 < l2 -> false
         | _ -> true
 
     let solve (lines: string array) = 
