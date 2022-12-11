@@ -6,24 +6,12 @@ module private TestData =
     let input = File.ReadAllText("Day6/input.txt")
 
 let detect (input: string) (requiredDistincts: int) =
-    let isNotStart charGroup =
-        let charSet = 
-            charGroup
-            |> Array.map snd
-            |> Set.ofArray
-
-        (charSet |> Set.count) < requiredDistincts
-
-    let secondLast =
-        input.ToCharArray()
-        |> Array.mapi (fun i c -> (i + 1, c))
-        |> Array.windowed requiredDistincts
-        |> Array.takeWhile isNotStart
-        |> Array.last
-        |> Array.last
-        |> fst
-
-    secondLast + 1
+    input
+    |> Seq.windowed requiredDistincts
+    |> Seq.indexed
+    |> Seq.map (fun (i, window) -> (i + requiredDistincts, window |> Set.ofSeq))
+    |> Seq.find (fun (_, window) -> (window |> Set.count) = requiredDistincts)
+    |> fst
 
 module Puzzle11 = 
     let solve (input: string) =
