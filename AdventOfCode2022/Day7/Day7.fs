@@ -5,17 +5,15 @@ open System.IO
 module private TestData = 
     let input = File.ReadAllLines("Day7/input.txt")
 
-type FileTree = 
-    | File of string * int
-    | Dir of string * FileTree list
-
-type Output = 
+type File = { Name: string; Size: int }
+type Directory = { Name: string; Files: File list; Directories: Directory list; TotalSize: int }
+type CommandLine = 
     | CD of string
     | LS
     | FileInfo of string * int
     | DirInfo of string
 
-let parseOutputs (lines: string array) = 
+let parseCommandLines (lines: string array) = 
     lines
     |> List.ofArray
     |> List.map (
@@ -26,79 +24,57 @@ let parseOutputs (lines: string array) =
         | x -> let a = x.Split(" ") in (a[1], int a[0]) |> FileInfo
     )
 
-let build lines = 
-    let rec buildFileTree cur outputs = 
-        let (@@) n x = n + x + "/"
+let rec buildDir dir commandLines =
+    let rec build dir commandLines = 
+        match commandLines with
+        | cl :: rest ->
+            match cl with
+            | CD ".." -> dir, rest
 
-        match outputs with
-        | output :: tail ->
-            match cur with
-            | Dir (n, trees) ->               
-                match output with
-                | CD x ->
-                    if x = ".." then
-                        cur, tail
-                    else
-                        let dir = Dir (n @@ x, [])
-                        let child, outputs' = buildFileTree dir tail
-                        let cur' = Dir (n, trees @ [child])
-                        buildFileTree cur' outputs'
+            | CD p ->
+                let childDir = { Name = p; Files = []; Directories = []; TotalSize = 0 }
+                let childDir', rest' = build childDir rest
+                let dir' = { dir with Directories = childDir' :: dir.Directories; TotalSize = dir.TotalSize + childDir'.TotalSize }
+                build dir' rest'
 
-                | FileInfo (x, s) -> 
-                    let child = File (n @@ x, s)
-                    let cur' = Dir (n, trees @ [child])
-                    buildFileTree cur' tail
+            | FileInfo (name, size) -> 
+                let dir' = { dir with Files = { Name = name; Size = size } :: dir.Files; TotalSize = dir.TotalSize + size }
+                build dir' rest
 
-                | _ -> buildFileTree cur tail
+            | _ -> build dir rest
 
-            | File (n, s) -> File(n, s), tail
+        | _ -> dir, []
 
-        | _ -> cur, []
-    
-    let outputs = parseOutputs lines
-    let root = Dir ("/", [])
-    let tree, _ = buildFileTree root (outputs |> List.tail)
-
-    tree
+    (build dir commandLines) |> fst
 
 module Puzzle13 =
     let solve lines = 
-        let tree = build lines
-        let mutable smalls: int list = []
+        let commandLines = (parseCommandLines lines) |> List.tail
+        let emptyRootDir = { Name = "/"; Files = []; Directories = []; TotalSize = 0 }
+        let rootDir = buildDir emptyRootDir commandLines
 
-        let rec stat tree =
-            match tree with
-            | Dir (_, trees) ->
-                let size = trees |> List.map stat |> List.sum
-                if size <= 10_0000 then
-                    smalls <- size :: smalls
-                    size
-                else 
-                    size
-            | File (_, size) -> size
+        let rec stats (dir: Directory) = 
+            let childDirs = (dir.Directories |> List.map stats |> List.concat)
 
-        stat tree |> ignore
+            if dir.TotalSize < 10_0000 then dir :: childDirs
+            else childDirs
 
-        smalls |> List.sum
-
+        stats rootDir
+        |> List.sumBy (fun d -> d.TotalSize)
+                
     let result = solve TestData.input
 
 module Puzzle14 = 
     let solve lines = 
-        let tree = build lines
-        let mutable dirSizes = []
+        let commandLines = (parseCommandLines lines) |> List.tail
+        let emptyRootDir = { Name = "/"; Files = []; Directories = []; TotalSize = 0 }
+        let rootDir = buildDir emptyRootDir commandLines
 
-        let rec collect tree = 
-            match tree with
-            | Dir (_, trees) ->
-                let size = trees |> List.map collect |> List.sum
-                dirSizes <- size :: dirSizes
-                size
+        let rec collect dir = 
+            let childDirs = (dir.Directories |> List.map collect |> List.concat)
+            dir :: childDirs
 
-            | File (_, size) -> size
-
-        collect tree |> ignore
-
+        let dirSizes = rootDir |> collect |> List.map (fun d -> d.TotalSize)
         let total = dirSizes |> List.max
 
         dirSizes
