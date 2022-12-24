@@ -20,15 +20,18 @@ let neighbours (grids: int[,]) r c =
 
     [ left; right; above; below ]
 
+let isEdge (grids: int[,]) r c =
+    let length1 = (grids |> Array2D.length1)
+    let length2 = (grids |> Array2D.length2)
+
+    r = 0 || c = 0 || r = length1 - 1 || c = length2 - 1
+
 module Puzzle15 =
     let solve (grids: int[,]) = 
         let visible i j v = 
-            let length1 = (grids |> Array2D.length1)
-            let length2 = (grids |> Array2D.length2)
-
-            match i, j, v with
-            | _ when i = 0 || j = 0 || i = length1 - 1 || j = length2 - 1 -> true
-            | _ ->
+            match isEdge grids i j with
+            | true -> true
+            | false ->
                 neighbours grids i j
                 |> Seq.exists (fun ns -> ns |> Seq.forall (fun n -> n < v))
 
@@ -43,12 +46,9 @@ module Puzzle15 =
 module Puzzle16 = 
     let solve (grids: int[,]) =  
         let score i j v =
-            let length1 = (grids |> Array2D.length1)
-            let length2 = (grids |> Array2D.length2)
-
-            match i, j, v with
-            | _ when i = 0 || j = 0 || i = length1 - 1 || j = length2 - 1 -> 0
-            | _ ->
+            match isEdge grids i j with
+            | true -> 0
+            | false ->
                 let rec grab trees = 
                     match trees with
                     | [] -> []
