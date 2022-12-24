@@ -5,6 +5,7 @@ open Day4
 open Day5
 open Day6
 open Day7
+open Day8
 
 printfn "%d" Puzzle1.result
 printfn "%d" Puzzle2.result
@@ -26,3 +27,6 @@ printfn "%d" Puzzle12.result
 
 printfn "%d" Puzzle13.result
 printfn "%d" Puzzle14.result
+
+printfn "%d" Puzzle15.result
+printfn "%d" Puzzle16.result
