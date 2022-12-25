@@ -12,9 +12,6 @@ let parseCmds (lines: string array) =
     |> Array.map (fun l -> l.Split(' '))
     |> Array.map (fun a -> a[0], int a[1])
 
-let isAdjacent (x1, y1) (x2, y2) = 
-    abs (x1 - x2) <= 1 && abs (y1 - y2) <= 1
-
 let follow (tx, ty) (hx, hy) =
     let distance x y = abs (x - y)
 
