@@ -18,18 +18,15 @@ let parseCmds (lines: string array) =
 
 module Puzzle19 = 
     let solve lines = 
-        let cycles = 
-            lines
-            |> parseCmds 
-            |> Seq.collect (function
-                | Noop  -> [0]
-                | Add x -> [0; x])
-            |> Seq.take 220
-            |> Seq.scan (fun state x -> state + x) 1
-
-        [ 20; 60; 100; 140; 180; 220 ]
-        |> List.map (fun c -> c, cycles |> Seq.item (c - 1))
-        |> List.map (fun t -> t ||> (*))
-        |> List.sum
+        lines
+        |> parseCmds 
+        |> Seq.collect (function
+            | Noop  -> [(1, 0)]
+            | Add x -> [(1, 0); (1, x)])
+        |> Seq.take 220
+        |> Seq.scan (fun state (cycle, x) -> (fst state + cycle, snd state + x)) (0, 1)
+        |> Seq.filter (fun (i, _) -> (i + 1 - 20) % 40 = 0) // during (20 + x * 40)th cycle, not after
+        |> Seq.map (fun (cycle, x) -> (cycle + 1) * x)
+        |> Seq.sum
     
     let result = solve TestData.input
