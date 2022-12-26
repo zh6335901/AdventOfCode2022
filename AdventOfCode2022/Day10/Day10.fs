@@ -25,7 +25,7 @@ module Puzzle19 =
             | Add x -> [(1, 0); (1, x)])
         |> Seq.take 220
         |> Seq.scan (fun state (cycle, x) -> (fst state + cycle, snd state + x)) (0, 1)
-        |> Seq.filter (fun (i, _) -> (i + 1 - 20) % 40 = 0) // during (20 + x * 40)th cycle, not after
+        |> Seq.filter (fun (i, _) -> (i - 19) % 40 = 0) // during (20 + x * 40)th cycle, not after
         |> Seq.map (fun (cycle, x) -> (cycle + 1) * x)
         |> Seq.sum
     
