@@ -40,16 +40,17 @@ module Puzzle20 =
                 | Noop  -> [0]
                 | Add x -> [0; x])
             |> Seq.scan (fun state x -> state + x) 1
-            |> Seq.toArray
+            |> Seq.take 240
 
-        let draw state cycle = 
-            let x = Array.item cycle xs
-            let pos = cycle % 40
-            let state' = state + if pos = 0 then "\n" else ""
-
-            state' + if abs (x - pos) <= 1 then "#" else "."
-
-        [0..239]
-        |> Seq.fold draw ""
+        xs
+        |> Seq.indexed
+        |> Seq.map (
+            fun (c, x) ->
+                let pos = c % 40
+                if abs (x - pos) <= 1 then "#" else "."
+        )
+        |> Seq.chunkBySize 40
+        |> Seq.map (String.concat "")
+        |> String.concat "\n"
 
     let result = solve TestData.input
