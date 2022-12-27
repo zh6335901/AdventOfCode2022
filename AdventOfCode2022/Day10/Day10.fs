@@ -33,7 +33,7 @@ module Puzzle19 =
 
 module Puzzle20 = 
     let solve lines =
-        let positions = 
+        let xs = 
             lines
             |> parseCmds
             |> Seq.collect (function
@@ -43,11 +43,11 @@ module Puzzle20 =
             |> Seq.toArray
 
         let draw state cycle = 
-            let pos = Array.item cycle positions
-            let x = cycle % 40
-            let state' = state + if x = 0 then "\n" else ""
+            let x = Array.item cycle xs
+            let pos = cycle % 40
+            let state' = state + if pos = 0 then "\n" else ""
 
-            state' + if abs (pos - x) <= 1 then "#" else "."
+            state' + if abs (x - pos) <= 1 then "#" else "."
 
         [0..239]
         |> Seq.fold draw ""
